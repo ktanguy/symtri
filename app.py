@@ -1,24 +1,59 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, jsonify, request, render_template
 import requests
 
 app = Flask(__name__)
 
-# Serve the index.html file for the root URL
+# Wolfram Alpha API Configuration
+api_key = ""  # Replace this with your own API key
+BASE_URL = "https://api.wolframalpha.com/v2/query"
+
 @app.route('/')
-def home():
+def index():
     return render_template('index.html')
 
-@app.route('/api/amortization')
-def loan_amortization():
-    amount = request.args.get('amount')
-    years = request.args.get('years')
-    rate = request.args.get('rate')
+@app.route('/api/finance', methods=['GET'])
+def get_current_stock_price():
+    # Get ticker from request parameters, default to AAPL
+    ticker = request.args.get('ticker', default='AAPL', type=str)
 
-    query = f"loan amortization for {amount} dollars over {years} years at {rate} percent interest"
-    url = f"http://api.wolframalpha.com/v2/query?input={query}&format=plaintext&output=JSON&appid=WAKRRY-7YKHA9WJ5P"
+    # Construct the query exactly as the working URL
+    query = f"current stock price of {ticker}"
+    
+    # Request parameters matching the working URL
+    params = {
+        "input": query,
+        "format": "image,plaintext",
+        "output": "JSON",
+        "appid": api_key
+    }
 
-    response = requests.get(url)
-    return jsonify(response.json())
+    # Make the request to Wolfram Alpha
+    response = requests.get(BASE_URL, params=params)
+    
+    # Error handling for API request failure
+    if response.status_code != 200:
+        return jsonify({"error": "Unable to get data from Wolfram Alpha"}), 500
+    
+    # Extracting the relevant data from the JSON response
+    data = response.json()
+    pods = data.get('queryresult', {}).get('pods', [])
+    stock_price = None
+
+    for pod in pods:
+        subpods = pod.get('subpods', [])
+        for subpod in subpods:
+            if subpod.get('plaintext'):
+                stock_price = subpod['plaintext']
+                break  # Found the price, no need to continue
+
+    # If no stock price is found, return a descriptive message
+    if not stock_price:
+        return jsonify({
+            "ticker": ticker,
+            "message": "No current price available."
+        }), 200
+
+    return jsonify({"ticker": ticker, "price": stock_price})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
