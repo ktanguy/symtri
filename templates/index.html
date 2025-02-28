@@ -3,160 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loan Amortization Calculator</title>
+    <title>Financial Data Fetcher</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             text-align: center;
             padding: 50px;
-            background: linear-gradient(135deg, #f0f0f5, #d6d6e0);
+            background: linear-gradient(135deg, #eef2f3, #8e9eab);
         }
         h1 {
-            color: #333;
+            color: #2c3e50;
         }
-        input[type="number"] {
-            padding: 12px;
-            width: 300px;
+        h3 {
+            color: #34495e;
+        }
+        label {
+            display: block;
             margin: 10px;
-            border: 1px solid #ccc;
-            border-radius: 25px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            outline: none;
-            transition: 0.3s;
+            font-size: 1.2em;
+            color: #2c3e50;
         }
-        input[type="number"]:focus {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
         }
         button {
-            padding: 12px 20px;
-            background-color: #007bff;
+            padding: 12px 25px;
+            background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
             transition: 0.3s;
+            font-size: 1.1em;
         }
         button:hover {
-            background-color: #0056b3;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            background-color: #2980b9;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
         .result {
-            margin-top: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             text-align: left;
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
         }
         .error {
-            color: red;
+            color: #e74c3c;
         }
         .loading {
-            display: inline-block;
-            border: 4px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 4px solid #3498db;
-            width: 30px;
-            height: 30px;
-            animation: spin 2s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-        th, td {
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        @media (max-width: 600px) {
-            input[type="number"], button {
-                width: 100%;
-                margin: 5px 0;
-            }
+            color: #2980b9;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Loan Amortization Calculator</h1>
-    <input type="number" id="amount" placeholder="Loan Amount (e.g., 200000)" min="1">
-    <input type="number" id="years" placeholder="Number of Years (e.g., 30)" min="1">
-    <input type="number" id="rate" placeholder="Interest Rate (e.g., 5)" min="0" step="0.01">
-    <button onclick="calculateAmortization()">Calculate</button>
-
+    <h1>Financial Data Fetcher</h1>
+    <h3>Select Data Options:</h3>
+    <label>
+        <input type="checkbox" id="economicGrowth">
+        Economic Growth in Rwanda
+    </label>
+    <label>
+        <input type="checkbox" id="sp500">
+        S&P 500 Historical Trends
+    </label>
+    <br>
+    <button onclick="fetchFinancialData()">Fetch Financial Data</button>
     <div class="result" id="result">
-        <!-- Loan Amortization details will appear here -->
+        <!-- Financial Data will appear here -->
     </div>
-
     <script>
-        async function calculateAmortization() {
-            const amount = document.getElementById('amount').value.trim();
-            const years = document.getElementById('years').value.trim();
-            const rate = document.getElementById('rate').value.trim();
+        async function fetchFinancialData() {
+            const econGrowthChecked = document.getElementById('economicGrowth').checked;
+            const sp500Checked = document.getElementById('sp500').checked;
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '<div class="loading"></div>';
-
-            // Input validation
-            if (amount === '' || years === '' || rate === '') {
-                resultDiv.innerHTML = '<p class="error">Please enter all fields correctly.</p>';
-                return;
-            }
+            resultDiv.innerHTML = '<p class="loading">Fetching data, please wait...</p>';
 
             try {
-                // Make API call with user inputs
-                const response = await fetch(`/api/amortization?amount=${amount}&years=${years}&rate=${rate}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.queryresult && data.queryresult.success) {
-                        const pods = data.queryresult.pods;
-                        resultDiv.innerHTML = `<h2>Loan Amortization Details:</h2>`;
-                        
-                        // Create a table for the results
-                        let tableHTML = `<table>
-                            <tr>
-                                <th>Description</th>
-                                <th>Value</th>
-                            </tr>`;
-                        
-                        pods.forEach(pod => {
-                            pod.subpods.forEach(subpod => {
-                                tableHTML += `<tr>
-                                    <td>${pod.title}</td>
-                                    <td>${subpod.plaintext}</td>
-                                </tr>`;
-                            });
-                        });
+                let resultHTML = '';
+                const promises = [];
 
-                        tableHTML += `</table>`;
-                        resultDiv.innerHTML += tableHTML;
+                // Economic Growth in Rwanda
+                if (econGrowthChecked) {
+                    resultHTML += `<h2>Economic Growth in Rwanda:</h2><p class="loading">Loading...</p>`;
+                    promises.push(
+                        fetch(`/api/economic-growth`)
+                            .then(res => res.json())
+                            .then(econData => {
+                                let econHTML = `<h2>Economic Growth in Rwanda:</h2>`;
+                                econData.forEach(pod => {
+                                        econHTML += `<p><strong>${pod.title}:</strong> ${pod.content}</p>`;
+                                });
+                                resultHTML = resultHTML.replace(/<h2>Economic Growth in Rwanda:<\/h2><p class="loading">Loading...<\/p>/, econHTML);
+                                resultDiv.innerHTML = resultHTML;
+                            })
+                            .catch(() => {
+                                resultHTML = resultHTML.replace(/<h2>Economic Growth in Rwanda:<\/h2><p class="loading">Loading...<\/p>/, '<p class="error">Failed to load data.</p>');
+                                resultDiv.innerHTML = resultHTML;
+                            })
+                    );
+                }
 
-                    } else if (data.queryresult.error) {
-                        resultDiv.innerHTML = `<p class="error">${data.queryresult.error.msg}</p>`;
-                    } else {
-                        resultDiv.innerHTML = `<p class="error">No details available.</p>`;
-                    }
-                } else {
-                    resultDiv.innerHTML = `<p class="error">Error: ${response.status} - ${response.statusText}</p>`;
+                // S&P 500 Historical Trends
+                if (sp500Checked) {
+                    resultHTML += `<h2>S&P 500 Historical Trends:</h2><p class="loading">Loading...</p>`;
+                    promises.push(
+                        fetch(`/api/economic-growth`)
+                            .then(res => res.json())
+                            .then(spData => {
+                                let spHTML = `<h2>S&P 500 Historical Trends:</h2>`;
+                                spData.forEach(pod => { 
+                                        spHTML += `<p><strong>${pod.title.translation}:</strong> ${pod.content.translation}</p>`; 
+                                });
+                                resultHTML = resultHTML.replace(/<h2>S&P 500 Historical Trends:<\/h2><p class="loading">Loading...<\/p>/, spHTML);
+                                resultDiv.innerHTML = resultHTML;
+                            })
+                            .catch((e) => {
+                                console.log(e)
+                                resultHTML = resultHTML.replace(/<h2>S&P 500 Historical Trends:<\/h2><p class="loading">Loading...<\/p>/, '<p class="error">Failed to load data.</p>');
+                                resultDiv.innerHTML = resultHTML;
+                            })
+                    );
+                }
+
+                // Wait for all promises to complete
+                await Promise.all(promises);
+
+                // If no options are selected
+                if (!econGrowthChecked && !sp500Checked) {
+                    resultDiv.innerHTML = '<p>No data selected. Please check at least one option.</p>';
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);

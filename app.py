@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 
 # Wolfram Alpha API Configuration
-api_key = ""  # Replace this with your own API key
+api_key = "WAKRRY-7YKHA9WJ5P"  # Replace this with your own API key
 BASE_URL = "https://api.wolframalpha.com/v2/query"
 
 @app.route('/')
@@ -17,7 +17,7 @@ def get_current_stock_price():
     ticker = request.args.get('ticker', default='AAPL', type=str)
 
     # Construct the query exactly as the working URL
-    query = f"current stock price of {ticker}"
+    query = f"Economic growth in Rwanda"
     
     # Request parameters matching the working URL
     params = {
